@@ -551,6 +551,11 @@ angular.module('mentio')
                 }
 
                 if (inline) {
+                  selectionEl.css({
+                    display: 'inline-block'
+                  });
+
+                } else {
                   // Move the button into place.
                   selectionEl.css({
                     top: coordinates.top + 'px',
@@ -558,10 +563,6 @@ angular.module('mentio')
                     position: 'absolute',
                     zIndex: 100,
                     display: 'block'
-                  });
-                } else {
-                  selectionEl.css({
-                    display: 'inline-block'
                   });
                 }
 
