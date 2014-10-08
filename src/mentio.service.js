@@ -25,6 +25,7 @@ angular.module('mentio')
                   selectionEl.css({
                     display: 'inline-block'
                   });
+
                 } else {
                   // Move the button into place.
                   selectionEl.css({
