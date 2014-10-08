@@ -157,10 +157,10 @@ angular.module('mentio', [])
                         if (
                             $attrs.id !== undefined ||
                             $attrs.mentioId !== undefined
-                        ) 
+                        )
                         {
                             if (
-                                $attrs.id === data.targetElement || 
+                                $attrs.id === data.targetElement ||
                                 (
                                     $attrs.mentioId !== undefined &&
                                     $scope.altId === data.targetElement
@@ -276,28 +276,28 @@ angular.module('mentio', [])
                         var isActive = scope.isActive();
                         var isContentEditable = scope.isContentEditable();
 
-                        var mentionInfo = mentioUtil.getTriggerInfo(scope.triggerCharSet, 
+                        var mentionInfo = mentioUtil.getTriggerInfo(scope.triggerCharSet,
                             scope.requireLeadingSpace, isActive);
 
-                        if (mentionInfo !== undefined && 
+                        if (mentionInfo !== undefined &&
                                 (
-                                    !isActive || 
-                                    (isActive && 
+                                    !isActive ||
+                                    (isActive &&
                                         (
-                                            /* content editable selection changes to local nodes which 
-                                            modifies the start position of the selection over time, 
+                                            /* content editable selection changes to local nodes which
+                                            modifies the start position of the selection over time,
                                             just consider triggerchar changes which
-                                            will have the odd effect that deleting a trigger char pops 
+                                            will have the odd effect that deleting a trigger char pops
                                             the menu for a previous
                                             trigger char sequence if one exists in a content editable */
-                                            (isContentEditable && mentionInfo.mentionTriggerChar === 
+                                            (isContentEditable && mentionInfo.mentionTriggerChar ===
                                                 scope.currentMentionTriggerChar) ||
-                                            (!isContentEditable && mentionInfo.mentionPosition === 
+                                            (!isContentEditable && mentionInfo.mentionPosition ===
                                                 scope.currentMentionPosition)
                                         )
                                     )
                                 )
-                            ) 
+                            )
                         {
                             /** save selection info about the target control for later re-selection */
                             scope.targetElement = mentionInfo.mentionSelectedElement;
@@ -340,7 +340,7 @@ angular.module('mentio', [])
                 triggerChar: '=mentioTriggerChar',
                 forElem: '=mentioFor',
                 parentScope: '=mentioParentScope',
-                manualPosition: '=mentioManualPosition'
+                inline: '=mentioInline'
             },
             templateUrl: function(tElement, tAttrs) {
                 return tAttrs.mentioTemplateUrl !== undefined ? tAttrs.mentioTemplateUrl : 'mentio-menu.tpl.html';
@@ -402,8 +402,11 @@ angular.module('mentio', [])
             }],
 
             link: function (scope, element) {
-                element[0].parentNode.removeChild(element[0]);
-                $document[0].body.appendChild(element[0]);
+                if (!scope.inline) {
+                  element[0].parentNode.removeChild(element[0]);
+                  $document[0].body.appendChild(element[0]);
+                }
+
                 scope.menuElement = element; // for testing
 
                 if (scope.parentScope) {
@@ -433,7 +436,7 @@ angular.module('mentio', [])
                             triggerCharSet.push(scope.triggerChar);
 
                             mentioUtil.popUnderMention(triggerCharSet, element,
-                              scope.requireLeadingSpace, scope.manualPosition);
+                              scope.requireLeadingSpace, scope.inline);
                         }
                     }
                 );
@@ -457,7 +460,7 @@ angular.module('mentio', [])
                         triggerCharSet.push(scope.triggerChar);
 
                         mentioUtil.popUnderMention(triggerCharSet, element,
-                          scope.requireLeadingSpace, scope.manualPosition);
+                          scope.requireLeadingSpace, scope.inline);
                     }
                 });
 
@@ -530,12 +533,12 @@ angular.module('mentio')
     .factory('mentioUtil', ["$window", "$location", "$anchorScroll", "$timeout", function ($window, $location, $anchorScroll, $timeout) {
 
         // public
-        function popUnderMention (triggerCharSet, selectionEl, requireLeadingSpace, manualPosition) {
+        function popUnderMention (triggerCharSet, selectionEl, requireLeadingSpace, inline) {
             var coordinates;
             var mentionInfo = getTriggerInfo(triggerCharSet, requireLeadingSpace, false);
 
-            if (manualPosition === undefined) {
-              manualPosition = false;
+            if (inline === undefined) {
+              inline = false;
             }
 
             if (mentionInfo !== undefined) {
@@ -547,19 +550,20 @@ angular.module('mentio')
                     coordinates = getContentEditableCaretPosition(mentionInfo.mentionPosition);
                 }
 
-                if (!manualPosition) {
-                // Move the button into place.
-                selectionEl.css({
+                if (inline) {
+                  // Move the button into place.
+                  selectionEl.css({
                     top: coordinates.top + 'px',
                     left: coordinates.left + 'px',
-                  });
-                }
-
-                selectionEl.css({
                     position: 'absolute',
                     zIndex: 100,
                     display: 'block'
-                });
+                  });
+                } else {
+                  selectionEl.css({
+                    display: 'inline-block'
+                  });
+                }
 
                 $timeout(function(){
                     scrollIntoView(selectionEl);
@@ -805,7 +809,7 @@ angular.module('mentio')
 
                 var hasTrailingSpace = false;
 
-                if (effectiveRange.length > 0 && 
+                if (effectiveRange.length > 0 &&
                     (effectiveRange.charAt(effectiveRange.length - 1) === '\xA0' ||
                         effectiveRange.charAt(effectiveRange.length - 1) === ' ')) {
                     hasTrailingSpace = true;
@@ -892,25 +896,25 @@ angular.module('mentio')
                         triggerChar = c;
                     }
                 });
-                if (mostRecentTriggerCharPos >= 0 && 
+                if (mostRecentTriggerCharPos >= 0 &&
                         (
-                            mostRecentTriggerCharPos === 0 || 
+                            mostRecentTriggerCharPos === 0 ||
                             !requireLeadingSpace ||
                             /[\xA0\s]/g.test
                             (
                                 effectiveRange.substring(
-                                    mostRecentTriggerCharPos - 1, 
+                                    mostRecentTriggerCharPos - 1,
                                     mostRecentTriggerCharPos)
                             )
                         )
-                    ) 
+                    )
                 {
                     var currentTriggerSnippet = effectiveRange.substring(mostRecentTriggerCharPos + 1,
                         effectiveRange.length);
 
                     triggerChar = effectiveRange.substring(mostRecentTriggerCharPos, mostRecentTriggerCharPos+1);
                     var firstSnippetChar = currentTriggerSnippet.substring(0,1);
-                    var leadingSpace = currentTriggerSnippet.length > 0 && 
+                    var leadingSpace = currentTriggerSnippet.length > 0 &&
                         (
                             firstSnippetChar === ' ' ||
                             firstSnippetChar === '\xA0'
@@ -946,7 +950,7 @@ angular.module('mentio')
                 }
 
             } else {
-                var selectedElem = window.getSelection().anchorNode; 
+                var selectedElem = window.getSelection().anchorNode;
                 if (selectedElem != null) {
                     var workingNodeContent = selectedElem.textContent;
                     var selectStartOffset = window.getSelection().getRangeAt(0).startOffset;
@@ -1011,12 +1015,12 @@ angular.module('mentio')
 
         function getTextAreaOrInputUnderlinePosition (element, position) {
             var properties = [
-                'direction', 
+                'direction',
                 'boxSizing',
-                'width', 
+                'width',
                 'height',
                 'overflowX',
-                'overflowY', 
+                'overflowY',
                 'borderTopWidth',
                 'borderRightWidth',
                 'borderBottomWidth',
@@ -1052,12 +1056,12 @@ angular.module('mentio')
 
             style.whiteSpace = 'pre-wrap';
             if (element.nodeName !== 'INPUT') {
-                style.wordWrap = 'break-word'; 
+                style.wordWrap = 'break-word';
             }
 
             // position off-screen
-            style.position = 'absolute'; 
-            style.visibility = 'hidden'; 
+            style.position = 'absolute';
+            style.visibility = 'hidden';
 
             // transfer the element's properties to the div
             properties.forEach(function (prop) {
@@ -1069,7 +1073,7 @@ angular.module('mentio')
                 if (element.scrollHeight > parseInt(computed.height))
                     style.overflowY = 'scroll';
             } else {
-                style.overflow = 'hidden'; 
+                style.overflow = 'hidden';
             }
 
             div.textContent = element.value.substring(0, position);

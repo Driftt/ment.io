@@ -157,10 +157,10 @@ angular.module('mentio', [])
                         if (
                             $attrs.id !== undefined ||
                             $attrs.mentioId !== undefined
-                        ) 
+                        )
                         {
                             if (
-                                $attrs.id === data.targetElement || 
+                                $attrs.id === data.targetElement ||
                                 (
                                     $attrs.mentioId !== undefined &&
                                     $scope.altId === data.targetElement
@@ -276,28 +276,28 @@ angular.module('mentio', [])
                         var isActive = scope.isActive();
                         var isContentEditable = scope.isContentEditable();
 
-                        var mentionInfo = mentioUtil.getTriggerInfo(scope.triggerCharSet, 
+                        var mentionInfo = mentioUtil.getTriggerInfo(scope.triggerCharSet,
                             scope.requireLeadingSpace, isActive);
 
-                        if (mentionInfo !== undefined && 
+                        if (mentionInfo !== undefined &&
                                 (
-                                    !isActive || 
-                                    (isActive && 
+                                    !isActive ||
+                                    (isActive &&
                                         (
-                                            /* content editable selection changes to local nodes which 
-                                            modifies the start position of the selection over time, 
+                                            /* content editable selection changes to local nodes which
+                                            modifies the start position of the selection over time,
                                             just consider triggerchar changes which
-                                            will have the odd effect that deleting a trigger char pops 
+                                            will have the odd effect that deleting a trigger char pops
                                             the menu for a previous
                                             trigger char sequence if one exists in a content editable */
-                                            (isContentEditable && mentionInfo.mentionTriggerChar === 
+                                            (isContentEditable && mentionInfo.mentionTriggerChar ===
                                                 scope.currentMentionTriggerChar) ||
-                                            (!isContentEditable && mentionInfo.mentionPosition === 
+                                            (!isContentEditable && mentionInfo.mentionPosition ===
                                                 scope.currentMentionPosition)
                                         )
                                     )
                                 )
-                            ) 
+                            )
                         {
                             /** save selection info about the target control for later re-selection */
                             scope.targetElement = mentionInfo.mentionSelectedElement;
@@ -340,7 +340,7 @@ angular.module('mentio', [])
                 triggerChar: '=mentioTriggerChar',
                 forElem: '=mentioFor',
                 parentScope: '=mentioParentScope',
-                manualPosition: '=mentioManualPosition'
+                inline: '=mentioInline'
             },
             templateUrl: function(tElement, tAttrs) {
                 return tAttrs.mentioTemplateUrl !== undefined ? tAttrs.mentioTemplateUrl : 'mentio-menu.tpl.html';
@@ -402,8 +402,11 @@ angular.module('mentio', [])
             },
 
             link: function (scope, element) {
-                element[0].parentNode.removeChild(element[0]);
-                $document[0].body.appendChild(element[0]);
+                if (!scope.inline) {
+                  element[0].parentNode.removeChild(element[0]);
+                  $document[0].body.appendChild(element[0]);
+                }
+
                 scope.menuElement = element; // for testing
 
                 if (scope.parentScope) {
@@ -433,7 +436,7 @@ angular.module('mentio', [])
                             triggerCharSet.push(scope.triggerChar);
 
                             mentioUtil.popUnderMention(triggerCharSet, element,
-                              scope.requireLeadingSpace, scope.manualPosition);
+                              scope.requireLeadingSpace, scope.inline);
                         }
                     }
                 );
@@ -457,7 +460,7 @@ angular.module('mentio', [])
                         triggerCharSet.push(scope.triggerChar);
 
                         mentioUtil.popUnderMention(triggerCharSet, element,
-                          scope.requireLeadingSpace, scope.manualPosition);
+                          scope.requireLeadingSpace, scope.inline);
                     }
                 });
 

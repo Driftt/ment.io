@@ -4,12 +4,12 @@ angular.module('mentio')
     .factory('mentioUtil', function ($window, $location, $anchorScroll, $timeout) {
 
         // public
-        function popUnderMention (triggerCharSet, selectionEl, requireLeadingSpace, manualPosition) {
+        function popUnderMention (triggerCharSet, selectionEl, requireLeadingSpace, inline) {
             var coordinates;
             var mentionInfo = getTriggerInfo(triggerCharSet, requireLeadingSpace, false);
 
-            if (manualPosition === undefined) {
-              manualPosition = false;
+            if (inline === undefined) {
+              inline = false;
             }
 
             if (mentionInfo !== undefined) {
@@ -21,19 +21,20 @@ angular.module('mentio')
                     coordinates = getContentEditableCaretPosition(mentionInfo.mentionPosition);
                 }
 
-                if (!manualPosition) {
-                // Move the button into place.
-                selectionEl.css({
+                if (inline) {
+                  selectionEl.css({
+                    display: 'inline-block'
+                  });
+                } else {
+                  // Move the button into place.
+                  selectionEl.css({
                     top: coordinates.top + 'px',
                     left: coordinates.left + 'px',
-                  });
-                }
-
-                selectionEl.css({
                     position: 'absolute',
                     zIndex: 100,
                     display: 'block'
-                });
+                  });
+                }
 
                 $timeout(function(){
                     scrollIntoView(selectionEl);
@@ -279,7 +280,7 @@ angular.module('mentio')
 
                 var hasTrailingSpace = false;
 
-                if (effectiveRange.length > 0 && 
+                if (effectiveRange.length > 0 &&
                     (effectiveRange.charAt(effectiveRange.length - 1) === '\xA0' ||
                         effectiveRange.charAt(effectiveRange.length - 1) === ' ')) {
                     hasTrailingSpace = true;
@@ -366,25 +367,25 @@ angular.module('mentio')
                         triggerChar = c;
                     }
                 });
-                if (mostRecentTriggerCharPos >= 0 && 
+                if (mostRecentTriggerCharPos >= 0 &&
                         (
-                            mostRecentTriggerCharPos === 0 || 
+                            mostRecentTriggerCharPos === 0 ||
                             !requireLeadingSpace ||
                             /[\xA0\s]/g.test
                             (
                                 effectiveRange.substring(
-                                    mostRecentTriggerCharPos - 1, 
+                                    mostRecentTriggerCharPos - 1,
                                     mostRecentTriggerCharPos)
                             )
                         )
-                    ) 
+                    )
                 {
                     var currentTriggerSnippet = effectiveRange.substring(mostRecentTriggerCharPos + 1,
                         effectiveRange.length);
 
                     triggerChar = effectiveRange.substring(mostRecentTriggerCharPos, mostRecentTriggerCharPos+1);
                     var firstSnippetChar = currentTriggerSnippet.substring(0,1);
-                    var leadingSpace = currentTriggerSnippet.length > 0 && 
+                    var leadingSpace = currentTriggerSnippet.length > 0 &&
                         (
                             firstSnippetChar === ' ' ||
                             firstSnippetChar === '\xA0'
@@ -420,7 +421,7 @@ angular.module('mentio')
                 }
 
             } else {
-                var selectedElem = window.getSelection().anchorNode; 
+                var selectedElem = window.getSelection().anchorNode;
                 if (selectedElem != null) {
                     var workingNodeContent = selectedElem.textContent;
                     var selectStartOffset = window.getSelection().getRangeAt(0).startOffset;
@@ -485,12 +486,12 @@ angular.module('mentio')
 
         function getTextAreaOrInputUnderlinePosition (element, position) {
             var properties = [
-                'direction', 
+                'direction',
                 'boxSizing',
-                'width', 
+                'width',
                 'height',
                 'overflowX',
-                'overflowY', 
+                'overflowY',
                 'borderTopWidth',
                 'borderRightWidth',
                 'borderBottomWidth',
@@ -526,12 +527,12 @@ angular.module('mentio')
 
             style.whiteSpace = 'pre-wrap';
             if (element.nodeName !== 'INPUT') {
-                style.wordWrap = 'break-word'; 
+                style.wordWrap = 'break-word';
             }
 
             // position off-screen
-            style.position = 'absolute'; 
-            style.visibility = 'hidden'; 
+            style.position = 'absolute';
+            style.visibility = 'hidden';
 
             // transfer the element's properties to the div
             properties.forEach(function (prop) {
@@ -543,7 +544,7 @@ angular.module('mentio')
                 if (element.scrollHeight > parseInt(computed.height))
                     style.overflowY = 'scroll';
             } else {
-                style.overflow = 'hidden'; 
+                style.overflow = 'hidden';
             }
 
             div.textContent = element.value.substring(0, position);
