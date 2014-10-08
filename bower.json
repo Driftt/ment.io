@@ -7,6 +7,7 @@
     "adamayres <magicaj@gmail.com>"
   ],
   "description": "Mentions for Angular",
+  "main": "dist/mentio.js",
   "keywords": [
     "angular",
     "mentions",
