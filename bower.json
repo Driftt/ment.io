@@ -1,13 +1,13 @@
 {
   "name": "ment.io",
-  "version": "0.9.15",
+  "version": "0.9.16",
   "homepage": "https://github.com/jeff-collins/ment.io",
   "authors": [
     "jeff-collins <i.am.jeff.collins@gmail.com>",
     "adamayres <magicaj@gmail.com>"
   ],
   "description": "Mentions for Angular",
-  "main": "dist/mentio.js",
+  "main": "./dist/mentio.js",
   "keywords": [
     "angular",
     "mentions",
