@@ -4,9 +4,13 @@ angular.module('mentio')
     .factory('mentioUtil', function ($window, $location, $anchorScroll, $timeout) {
 
         // public
-        function popUnderMention (triggerCharSet, selectionEl, requireLeadingSpace) {
+        function popUnderMention (triggerCharSet, selectionEl, requireLeadingSpace, manualPosition) {
             var coordinates;
             var mentionInfo = getTriggerInfo(triggerCharSet, requireLeadingSpace, false);
+
+            if (manualPosition === undefined) {
+              manualPosition = false;
+            }
 
             if (mentionInfo !== undefined) {
 
@@ -17,10 +21,15 @@ angular.module('mentio')
                     coordinates = getContentEditableCaretPosition(mentionInfo.mentionPosition);
                 }
 
+                if (!manualPosition) {
                 // Move the button into place.
                 selectionEl.css({
                     top: coordinates.top + 'px',
                     left: coordinates.left + 'px',
+                  });
+                }
+
+                selectionEl.css({
                     position: 'absolute',
                     zIndex: 100,
                     display: 'block'

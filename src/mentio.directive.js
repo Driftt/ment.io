@@ -339,7 +339,8 @@ angular.module('mentio', [])
                 items: '=mentioItems',
                 triggerChar: '=mentioTriggerChar',
                 forElem: '=mentioFor',
-                parentScope: '=mentioParentScope'
+                parentScope: '=mentioParentScope',
+                manualPosition: '=mentioManualPosition'
             },
             templateUrl: function(tElement, tAttrs) {
                 return tAttrs.mentioTemplateUrl !== undefined ? tAttrs.mentioTemplateUrl : 'mentio-menu.tpl.html';
@@ -430,7 +431,9 @@ angular.module('mentio', [])
                         if (scope.isVisible()) {
                             var triggerCharSet = [];
                             triggerCharSet.push(scope.triggerChar);
-                            mentioUtil.popUnderMention(triggerCharSet, element, scope.requireLeadingSpace);
+
+                            mentioUtil.popUnderMention(triggerCharSet, element,
+                              scope.requireLeadingSpace, scope.manualPosition);
                         }
                     }
                 );
@@ -452,7 +455,9 @@ angular.module('mentio', [])
                     if (visible) {
                         var triggerCharSet = [];
                         triggerCharSet.push(scope.triggerChar);
-                        mentioUtil.popUnderMention(triggerCharSet, element, scope.requireLeadingSpace);
+
+                        mentioUtil.popUnderMention(triggerCharSet, element,
+                          scope.requireLeadingSpace, scope.manualPosition);
                     }
                 });
 
